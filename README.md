@@ -9,6 +9,10 @@ Java versions covered: 8, 11 and eventually 17.
         - [JIT Compiler](#jit-compiler)
     - [The C1 and C2 Compilers](#the-c1-and-c2-compilers)
     - [Code cache](#code-cache)
+- [**Selecting the JVM**](#selecting-the-jvm)
+  - [32 vs 64 bit JVM](#32-vs-64-bit-jvm)
+  - [Tiered Compilation](#tiered-compilation)
+  - [Tuning the native compiler](#tuning-the-native-compiler)
 
 ## **JVM and the Bytecode**
 
@@ -80,7 +84,7 @@ spend more time on the compilation.
 The JVM would decide which compile level would be applied to your code from 1 to 4 level 
 (4 is the most optimized level).
 
-![JIT compiler for the JVM](E:\GitHub\Java_Performance\img\Compilers_JVM.svg "JIT_Compilers")
+![JIT compiler for the JVM](img/Compilers_JVM.svg "JIT_Compilers")
 
 > We can see when the C2 compiler is used in the code as the method is called if we use the
 > flags:
@@ -120,3 +124,61 @@ because cannot use the code cache (is already full).
 
 **We can use JConsole to monitor the code cache in a remote way, just connect the process
 you want to monitor and select memory menu.**
+
+## Selecting the JVM
+
+### 32 vs 64 bit JVM
+Here are some key difference between 32-bit and 64-bit Java Virtual Machine
+
+1. 64-bit JVM, you can specify more memory for heap size than 32-bit JVM, like in 
+32-bit JVM, the theoretical limit for maximum memory in 32-bit is 4G, but 64-bit is 
+much higher.
+
+2. 64-bit JVM is particularly useful for Java applications with large heaps, like 
+applications that use more than 100G for max memory.
+
+3. The same Java application will take memory while running in 64-bit JVM then 32-bit 
+because of the increased size of OOP (Ordinary Object pointer), from 32 to 64 bits. Though
+you can get away with this by using -XXCompressedOOP JVM option, which tells JVM to use 
+32-bit pointers.
+
+4. Both 32-bit and 64-bit JVM have a separate installer.
+
+5. One more thing that changed in the 64 bit JVM architecture is object header size; it is 
+now 12 bytes in comparison to 8 bytes headers in 32 bit JVM. Another thing that changed is 
+the size of internal references that means it can go a maximum of up to 8 bytes wherein 32 
+bit JVM up-to 4 bytes.
+
+So, from these two points, you can conclude that an application running on 64 bit JVM will
+consume more space in comparison when the same application runs on the 32-bit version.
+
+> In order to force the JIT compiler to use only a type of compiler we can use the flags:
+> 
+> _-client_ for client compiler(C1)
+> 
+> _-server_ for server compiler(C2)
+> 
+> _-d64_ for the 64 bit compiler version
+
+### Tiered Compilation
+
+As we mentioned in the previous section, our Java program, compiled by **javac**, starts its 
+execution in an interpreted mode. The JVM tracks each frequently called method and compiles 
+them. In order to do that, it uses C1 for the compilation. But, the HotSpot still keeps an
+eye on the future calls of those methods. If the number of calls increases, the JVM will 
+recompile these methods once more, but this time using C2.
+
+This is the default strategy used by the HotSpot, called **tiered compilation**.
+
+> We can force the JVM to run in interpreter-mode only with the flag:
+> 
+> _-XX:-TieredCompilation_ (we turn off the flag)
+
+### Tuning the native compiler
+> We can specify the number of threads to perform a compilation with the flag:
+>
+> _-XX:-CICompilerSize=[size]_ (default 3, minimum 2)
+> 
+> We also can specify the  threshold number for the C2 compiler to be triggered:
+> 
+> _-XX:CompileThreshold=[threshold_value]_
