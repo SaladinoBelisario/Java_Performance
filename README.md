@@ -1,7 +1,14 @@
 # **Java Performance Notes**
 Java versions covered: 8, 11 and eventually 17.
 
-## **Index**
+# **Table of contents**
+- [**JVM and the Bytecode**](#jvm-and-the-bytecode)
+    - [Bytecode](#bytecode)
+    - [JIT Compiler vs Interpreter](#jit-compiler-vs-interpreter)
+        - [Interpreter](#interpreter)
+        - [JIT Compiler](#jit-compiler)
+    - [The C1 and C2 Compilers](#the-c1-and-c2-compilers)
+    - [Code cache](#code-cache)
 
 ## **JVM and the Bytecode**
 
