@@ -1,4 +1,4 @@
-# **Java Performance Notes**
+# **`Java Performance Notes`**
 Java versions covered: 8, 11 and eventually 17.
 
 # **Table of contents**
@@ -125,7 +125,7 @@ because cannot use the code cache (is already full).
 **We can use JConsole to monitor the code cache in a remote way, just connect the process
 you want to monitor and select memory menu.**
 
-## Selecting the JVM
+## **Selecting the JVM**
 
 ### 32 vs 64 bit JVM
 Here are some key difference between 32-bit and 64-bit Java Virtual Machine
@@ -182,3 +182,45 @@ This is the default strategy used by the HotSpot, called **tiered compilation**.
 > We also can specify the  threshold number for the C2 compiler to be triggered:
 > 
 > _-XX:CompileThreshold=[threshold_value]_
+
+## **Memory allocations: Heap vs Stack**
+
+Our starting point is to understand the terms of the stack and the heap when our applications
+run they need access to some of our computers' memory, for example, to store the objects 
+that we create and hold a memory.
+
+### The stack
+
+The stack is a very efficient data structure, which is managed effectively by the Java virtual 
+machine.
+
+One important aspect of the stack is that Java knows exactly when data on the stack can be 
+destroyed (garbage collection).
+
+In Java **all local variables are created on the stack**, and they are automatically popped from
+the stack when you reach the close of the block that created that variable. All this happens 
+within the Java Virtual Machine.
+
+### The heap
+
+The second area of Java's memory is called the heap. Although the stack is a very efficient
+data structure, it can't be used to store complex data types such as an **object**.
+
+## Passing objects methods
+
+### Passing variables vs passing references
+
+All object references in Java are passed by value. This means that a copy of the value will
+be passed to a method. But the trick is that passing a copy of the value also changes the real
+value of the object.
+
+For objects passed to methods, the **Reference** to the object is passed by **Value**
+
+**_final_ keyword**
+
+Real meaning of the final keyword is not that the variable can never be changed, but 
+that the variable can only be assigned once. Once the variable has been assigned, it can never 
+be altered.
+
+The _final_ keyword **doesn't stop** the object value from changing, only prevents the stack pointer
+from changing to the actual object.
