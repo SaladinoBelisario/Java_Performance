@@ -255,6 +255,8 @@ are declared to be living in the metaspace.
 
 ### PermGen vs Metaspace
 
+![Java memory management between versions](img/Metaspace.svg "Metaspace vs PermGen")
+
 #### PermGen
 
 PermGen (Permanent Generation) is a special heap space separated from the main memory heap.
@@ -314,3 +316,53 @@ Therefore, **with this improvement, JVM reduces the chance to get the OutOfMemor
 
 **Despite all of these improvements, we still need to monitor and tune the metaspace to avoid 
 memory leaks.**
+
+## **Tuning the JVM Memory Settings**
+
+### String pool
+
+Java internally implements the **flyweight pattern** and generates a pool of Strings that is 
+shared. In this way, every time we need to create a new Java chain, it checks if it already 
+exists in the pool, in which case it returns a reference to it.
+
+If our string pool is so full, it would be so condensed, it's going to be pretty inefficient.
+Being aware of the density of your string pool, particularly for very big applications, is
+definitely something to be aware of and to monitor, because if it is getting to be quite
+dense, that could be something which is going to be slowing down your application.
+
+The following flag will give us information about strings in our application:
+
+    -XX:+PrintStringTableStatistics
+
+this flag tells us how many buckets there are in the pool and how dense our pool is.
+
+
+
+#### Tuning the size of the string pool
+
+Remember, this doesn't get resized unlike a regular hashmap. So whatever number we start
+with is going to be the number for the length of our application.
+
+The flag for specifying the string pool size is, this flag specifies the **number of buckets**:
+    
+    -XX:StringTableSzie=[size]
+
+**For this to work in an optimal way, the number that you provide in here should be a 
+prime number.**
+
+#### Tuning the size of the heap
+
+The flag for specifying the maximum heap size is:
+
+    -XX:MaxHeapSize=[size]
+    -Xmx[size] as the shortcut form
+
+If we want to specify the initial heap size we can use:
+
+    -XX:InitialHeapSize=[size]
+    -Xms[size] as the shortcut form
+
+If we want to know the default values of these parameters we can use the flags combined:
+
+    -XX:+UnlockDiagnosticVMOptions
+    -XX:+PrintFlagsFinal
