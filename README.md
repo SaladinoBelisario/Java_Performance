@@ -86,12 +86,11 @@ The JVM would decide which compile level would be applied to your code from 1 to
 
 ![JIT compiler for the JVM](img/Compilers_JVM.svg "JIT_Compilers")
 
-> We can see when the C2 compiler is used in the code as the method is called if we use the
-> flags:
->
-> _-XX:+UnlockDiagnosticVMOptions_ 
->
-> _-XX:+LongCompilation_
+We can see when the C2 compiler is used in the code as the method is called if we use the
+flags:
+
+    -XX:+UnlockDiagnosticVMOptions
+    -XX:+LongCompilation
 
 
 ### Code cache
@@ -108,19 +107,19 @@ If you have too much code for optimization you will see a message like this:
 meaning that even though there are code to be optimized, the compiler won't optimize such code
 because cannot use the code cache (is already full).
 
-> We can see the code cache size and other basic information if we use the flag:
->
-> _-XX:+PrintCodeCache_
+We can see the code cache size and other basic information if we use the flag:
 
-> We specify the initial, maximum and growing rate for the code cache with the flags:
->
-> _-XX:InitialCodeCacheSize=[size]_ 
-> 
-> _-XX:ReservedCodeCacheSize=[size]_ 
-> 
-> _-XX:CodeCacheExpansionSize=[size]_
-> 
-> the size can be provided in Kilobytes (k) or Megabytes(m or M)
+    -XX:+PrintCodeCache
+
+We specify the initial, maximum and growing rate for the code cache with the flags:
+
+    -XX:InitialCodeCacheSize=[size]
+
+    -XX:ReservedCodeCacheSize=[size]
+
+    -XX:CodeCacheExpansionSize=[size]
+
+the size can be provided in Kilobytes (k) or Megabytes(m or M)
 
 **We can use JConsole to monitor the code cache in a remote way, just connect the process
 you want to monitor and select memory menu.**
@@ -152,13 +151,13 @@ bit JVM up-to 4 bytes.
 So, from these two points, you can conclude that an application running on 64 bit JVM will
 consume more space in comparison when the same application runs on the 32-bit version.
 
-> In order to force the JIT compiler to use only a type of compiler we can use the flags:
-> 
-> _-client_ for client compiler(C1)
-> 
-> _-server_ for server compiler(C2)
-> 
-> _-d64_ for the 64 bit compiler version
+In order to force the JIT compiler to use only a type of compiler we can use the flags:
+
+    -client for client compiler(C1)
+    
+    -server for server compiler(C2)
+
+    -d64 for the 64 bit compiler version
 
 ### Tiered Compilation
 
@@ -170,18 +169,18 @@ recompile these methods once more, but this time using C2.
 
 This is the default strategy used by the HotSpot, called **tiered compilation**.
 
-> We can force the JVM to run in interpreter-mode only with the flag:
-> 
-> _-XX:-TieredCompilation_ (we turn off the flag)
+We can force the JVM to run in interpreter-mode only with the flag:
+
+    -XX:-TieredCompilation (we turn off the flag)
 
 ### Tuning the native compiler
-> We can specify the number of threads to perform a compilation with the flag:
->
-> _-XX:-CICompilerSize=[size]_ (default 3, minimum 2)
-> 
-> We also can specify the  threshold number for the C2 compiler to be triggered:
-> 
-> _-XX:CompileThreshold=[threshold_value]_
+We can specify the number of threads to perform a compilation with the flag:
+
+    -XX:-CICompilerSize=[size] (default 3, minimum 2)
+
+We also can specify the  threshold number for the C2 compiler to be triggered:
+
+    -XX:CompileThreshold=[threshold_value]
 
 ## **Memory allocations: Heap vs Stack**
 
@@ -206,7 +205,7 @@ within the Java Virtual Machine.
 The second area of Java's memory is called the heap. Although the stack is a very efficient
 data structure, it can't be used to store complex data types such as an **object**.
 
-## Passing objects methods
+## **Passing objects methods**
 
 ### Passing variables vs passing references
 
@@ -224,3 +223,94 @@ be altered.
 
 The _final_ keyword **doesn't stop** the object value from changing, only prevents the stack pointer
 from changing to the actual object.
+
+## **The Metaspace and internal JVM memory optimisation**
+
+In general, the heap is absolutely huge compared to the stacks and the metaspace, which are
+quite small. So the metaspace is used primarily to store metadata. That's going to be 
+information about classes, methods, which methods, for example, have been compiled into 
+bytecode and which should be compiled native code in general.
+
+But there are other uses for the better space which are more interesting. 
+
+And **the first** of these is it's where **static variables are stored**. We can think of the metaspace
+as having the same role as a stack for any object or any variable that we declare as a static
+variable so static primitives are stored entirely in the metaspace and **static objects
+are stored on the heap**, but with the object pointer or **reference held in the metaspace**.
+
+So if, for example, we declared a _static int_, that's a primitive core global variable that
+would exist solely in the meta space if we created a static object in this case, it would be
+a _hashmap_. That map would be created on the heap, but with the variable reference in this
+case called settings in the metaspace.
+
+Unlike a stack where variables can be popped off when they go out of scope, variables in the 
+matter space are permanently there, as we would expect for static variables. They never reach
+a state where they can no longer be referenced. **So any objects on the heap which are referenced
+from the metaspace will never be garbage collected**.
+
+**All classes and all threads within a Java program have access to the metaspace**, and that's 
+why static variables can be accessed by any piece of code we write in our application, because 
+the thread running that code can access the letter space, so it can access any variables that
+are declared to be living in the metaspace.
+
+### PermGen vs Metaspace
+
+#### PermGen
+
+PermGen (Permanent Generation) is a special heap space separated from the main memory heap.
+
+The JVM keeps track of loaded class metadata in the PermGen. Additionally, the JVM stores all
+the static content in this memory section. This includes all the static methods, primitive 
+variables, and references to the static objects.
+
+Furthermore, it contains data about bytecode, names, and JIT information. Before Java 7, the
+_String Pool_ was also part of this memory. 
+
+The default maximum memory size for 32-bit JVM is 64 MB and 82 MB for the 64-bit version.
+
+However, we can change the default size with the JVM options:
+
+    -XX:PermSize=[size] is the initial or minimum size of the PermGen space
+
+    -XX:MaxPermSize=[size] is the maximum size
+
+Most importantly, **Oracle completely removed this memory space in the JDK 8 release**.
+Therefore, if we use these tuning flags in Java 8 and newer versions, we'll get the following
+warnings:
+
+`>> java -XX:PermSize=100m -XX:MaxPermSize=200m -version
+OpenJDK 64-Bit Server VM warning: Ignoring option PermSize; support was removed in 8.0
+OpenJDK 64-Bit Server VM warning: Ignoring option MaxPermSize; support was removed in 8.0
+...`
+
+With its limited memory size, PermGen is involved in generating the famous _OutOfMemoryError_. 
+Simply put, the class loaders weren't garbage collected properly and, as a result, generated
+a memory leak.
+
+Therefore, we receive a memory space error; this happens mostly in the development environment
+while creating new class loaders.
+
+#### Metaspace
+
+Simply put, Metaspace is a new memory space (starting from the Java 8 version); **it has replaced
+the older PermGen memory space**. The most significant difference is how it handles memory 
+allocation.
+
+Specifically, **this native memory region grows automatically by default**.
+
+We also have new flags to tune the memory:
+
+* MetaspaceSize and MaxMetaspaceSize: we can set the Metaspace upper bounds.
+* MinMetaspaceFreeRatio: is the minimum percentage of class metadata capacity free after
+garbage collection
+* MaxMetaspaceFreeRatio: is the maximum percentage of class metadata capacity free after a
+garbage collection to avoid a reduction in the amount of space
+
+Additionally, the garbage collection process also gains some benefits from this change. The
+garbage collector now automatically triggers the cleaning of the dead classes once the class
+metadata usage reaches its maximum metaspace size.
+
+Therefore, **with this improvement, JVM reduces the chance to get the OutOfMemory error**.
+
+**Despite all of these improvements, we still need to monitor and tune the metaspace to avoid 
+memory leaks.**
