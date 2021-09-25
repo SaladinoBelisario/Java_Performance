@@ -366,3 +366,54 @@ If we want to know the default values of these parameters we can use the flags c
 
     -XX:+UnlockDiagnosticVMOptions
     -XX:+PrintFlagsFinal
+
+## **Garbage collection**
+
+One of the big differences between Java and some other programming languages that you might
+have used, such as C are that when you finished using an object in Java, you don't have to tell 
+Java that it's no longer needed.
+
+The virtual machine works this out automatically in languages like C or C++. Plus the exact 
+opposite of this is the case for any object on the heap in these languages. The programmer must 
+include code that tells the language that you finished with this object in C, you do this by
+calling a function called free in visual basic.
+
+**The way Java knows wich object it's no longer needed it's when an object cannot be reached 
+through a reference from the stack.**
+
+### The _gc()_ method
+
+There are some methods in the Java API that seem to have a bearing on the garbage collector. In
+particular, there's a method of the system class called GC. If you see the Java docs for the 
+method you'll see it says that the method **suggests** that the Java virtual machine runs 
+the garbage collection process, so it's going to tell the virtual machine to run a garbage 
+collection process **but there's no guarantee** that the virtual machine will actually do that.
+
+### The _finalize()_ method
+
+When an object is garbage collected Java will run the _finalize()_ method, the method is available 
+for use in all Java version but is deprecated since Java 9.
+
+## **Monitoring the Heap**
+
+**(J)VisualVM**  is actually an Oracle project, although Oracle have released it under the 
+new version to license with classpath exception. So it is absolutely free for you to 
+download and use.
+
+You might notice if you read the download page that actually what you're downloading 
+is the Oracle JDK 8 version of Java official VM. That's because from version 9 
+onwards they've moved this into something called the **GraalVisualVM**.
+
+**With these tools we can monitor our application memory and identify memory issues.**
+
+## **Analysing a heap dump**
+
+### Generating a heap dump
+
+In order to generate a heap dump from the JVM we use:
+
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=[path]
+
+If we want to analyze the heap dump file we need to use a memory analyzer, IntelliJ and Eclipse
+has tools to do this.
