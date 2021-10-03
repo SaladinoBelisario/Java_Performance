@@ -101,9 +101,17 @@ Java versions covered: 8, 11 and eventually 17.
 
 # **Introduction**
 
-## **JVM and the Bytecode**
+## **Definitions**
 
-### Bytecode
+### Java Performance Overview
+
+### Definitions
+
+## **Overview of the JVM**
+
+### JVM and the Bytecode
+
+#### Bytecode
 
 The Java bytecode is the instruction set that Java Virtual Machine can interpret, as assembler in
 bare metal machines can be executed, the JVM executes this bytecode, to do this JVM use two 
@@ -112,7 +120,7 @@ different mechanisms:
     - The Interpreter
     - The Just-In-Time Compiler
 
-### JIT Compiler vs Interpreter
+#### JIT Compiler vs Interpreter
 
 When we compile our Java program (e.g., using the javac command), we'll end up with our source code compiled into the binary representation 
 of our code (JVM bytecode).
@@ -128,11 +136,11 @@ in most cases.
 
 ![Bytecode generation and interpretation](img/JVM_Bytecode.svg "JVM_Bytecode")
 
-#### Interpreter
+##### Interpreter
 An Interpreter normally reads the code line by line and translates the code to machine code 
 as it reads the lines.
 
-#### JIT Compiler
+##### JIT Compiler
 The Just-In-Time compiler is similar to the Interpreter in most cases, but has a significant 
 difference: the JIT Compiler would compile the **most used code** to **native machine code**, for
 the rest is similar because it reads line by line the code. To know what code to compile it saves 
@@ -157,7 +165,7 @@ When you compile this code you can see something like this:
 
 this means that your code has been compiled to the most optimal compilation level (level 4)
 
-### The C1 and C2 Compilers
+#### The C1 and C2 Compilers
 
 The JDK implementation contains two conventional JIT-compilers: the client compiler, also 
 called C1 and the server compiler, called opto or C2.
@@ -180,7 +188,7 @@ flags:
     -XX:+LongCompilation
 
 
-### Code cache
+#### Code cache
 
 The compiled code from the JIT compiler is going to be allocated in the code cache, as a cache
 the reason for using it is to improve the performance of the I/O operations 
@@ -211,13 +219,13 @@ the size can be provided in Kilobytes (k) or Megabytes(m or M)
 **We can use JConsole to monitor the code cache in a remote way, just connect the process
 you want to monitor and select memory menu.**
 
-## **Memory allocations: Heap vs Stack**
+### Memory allocations: Heap vs Stack
 
 Our starting point is to understand the terms of the stack and the heap when our applications
 run they need access to some of our computers' memory, for example, to store the objects
 that we create and hold a memory.
 
-### The stack
+#### The stack
 
 The stack is a very efficient data structure, which is managed effectively by the Java virtual
 machine.
@@ -229,14 +237,14 @@ In Java **all local variables are created on the stack**, and they are automatic
 the stack when you reach the close of the block that created that variable. All this happens
 within the Java Virtual Machine.
 
-### The heap
+#### The heap
 
 The second area of Java's memory is called the heap. Although the stack is a very efficient
 data structure, it can't be used to store complex data types such as an **object**.
 
-## **Passing objects methods**
+### Passing objects methods
 
-### Passing variables vs passing references
+#### Passing variables vs passing references
 
 All object references in Java are passed by value. This means that a copy of the value will
 be passed to a method. But the trick is that passing a copy of the value also changes the real
@@ -253,6 +261,10 @@ be altered.
 The _final_ keyword **doesn't stop** the object value from changing, only prevents the stack pointer
 from changing to the actual object.
 
+### Monitoring and Tooling for the JVM
+
+### Meet the JVMs
+
 # **Performance Testing**
 
 ## **Microbenchmarks**
@@ -261,13 +273,66 @@ from changing to the actual object.
 
 ## **Mesobenchmarks**
 
-## **Benchmarking with JMH**
+## **Types of performance testing**
 
-## **Throughput, Batching, and Response Time**
+### Latency test
+
+### Throughput test
+
+#### Throughput, Batching, and Response Time
+
+### Load test
+
+### Stress test
+
+### Endurance test
+
+### Capacity planning test
+
+### Degradation test
+
+## **Best practices**
+
+### Top-Down Reference
+### Creating a test environment
+### Identifying performance requirements
+### Java-specific issues
+### Performance testing as part of the SDLC
+
+## **Benchmarking with JMH**
 
 ## **Understand Variability**
 
 ## **Test Early, Test Often**
+
+## **Performance antipatterns**
+
+### Introduction to antipatterns
+
+#### Boredom
+#### Résumé padding
+#### Peer pressure
+#### Lack of understanding
+#### Misunderstood/Nonexistent problem
+
+### Antipatterns catalogue
+
+#### Distracted by shiny
+#### Distracted by simple
+#### Performance tuning wizard
+#### Tuning by folklore
+#### The blame donkey
+#### Missing the bigger picture
+#### UAT is my desktop
+#### Production-like data is hard
+
+## **Cognitive biases**
+
+### Reductionist thinking
+### Confirmation bias
+### Fog of war
+### Risk bias
+### Ellsberg's paradox
 
 # **A Java Performance Toolbox**
 
@@ -275,13 +340,30 @@ from changing to the actual object.
 
 ## **Java Monitoring Tools**
 
+## **GC Logging**
+
+### Switching On GC Logging
+### GC Logs Versus JMX
+
 ## **Profiling Tools**
+### Modern profilers
+### Allocation profiling
 
 ## **Java Flight Recorder**
 
 # **JVM and Compilers**
 
 ## **Just-in-Time Compilers: An Overview**
+
+### Introducing JITWatch
+### Inlining
+### Loop unrolling
+### Escape analysis
+### Monomorphic Dispatch
+### Intrinsics
+### On-Stack Replacement
+### Safepoints Revisited
+### Core Library Methods
 
 ## **Tiered Compilation**
 
@@ -605,11 +687,30 @@ There are three types of garbage collector we can use in our applications:
 
 ### G1 Garbage Collector
 
+### Concurrent GC Theory
+
 ### CMS Collector
+
+### C4(Azul zing)
+
+### Balanced(IBM J9)
 
 ### Advanced Tunings
 
 ### Experimental GC Algorithms
+
+#### Shenandoah
+#### ZGC
+#### Epsilon GC
+
+### Legacy HostPot collectors
+
+## **GC Tuning**
+
+### Basic GC Tuning
+### Parallel GC Tuning
+### CMS Tuning
+### G1 Tuning
 
 # **Heap Memory Best Practices**
 
@@ -678,15 +779,22 @@ has tools to do this.
 ## **Exceptions**
 ## **Logging**
 ## **Java Collections API**
+### Optimizing collections
+#### Optimizing collections for Lists
+#### Optimizing collections for Maps
+#### Optimizing collections for Sets
 ## **Lambdas and Anonymous Classes**
 ## **Stream and Filter Performance**
 ## **Object Serialization**
+## **Domain objects**
+## **Avoid finalization**
+## **Method Handles**
 
 # **Summary of Tuning Flags**
 
 # **References/Bibliography**
 
->[1]
+> [1]
 > «Java Application Performance and Memory Management», Udemy. [Online]. Disponible en: 
 > https://www.udemy.com/course/java-application-performance-and-memory-management/. [Accedido: 
 > 26-sep-2021]
@@ -694,3 +802,7 @@ has tools to do this.
 > [2]
 > S. Oaks, Java performance: in-depth advice for tuning and programing Java 8, 11, and beyond,
 > Second edition. Beijing [China]; North Sebastopol, CA: O’Reilly, 2020.
+> 
+> [3]
+> B. J. Evans, J. Gough, y C. Newland, Optimizing Java: practical techniques for improving 
+> JVM application performance, First edition. Sebastopol, California: O’Reilly Media, 2018.
